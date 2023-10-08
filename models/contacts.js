@@ -4,12 +4,8 @@ import { nanoid } from "nanoid";
 
 const contactPath = path.resolve("models", "contacts.json");
 
-const updateContactsFile = async (contacts) => {
-  try {
-    await fs.writeFile(contactPath, JSON.stringify(contacts, null, 2));
-  } catch (error) {
-    throw error;
-  }
+const writeContactsToFile = async (contacts) => {
+  await fs.writeFile(contactPath, JSON.stringify(contacts, null, 2));
 };
 
 export const listContacts = async () => {
@@ -17,13 +13,14 @@ export const listContacts = async () => {
     const data = await fs.readFile(contactPath);
     return JSON.parse(data);
   } catch (error) {
-    throw error;
+    throw new Error("Unable to read contacts file.");
   }
 };
 
 export const getContactById = async (contactId) => {
   const contacts = await listContacts();
-  return contacts.find((contact) => contact.id === contactId) || null;
+  const result = contacts.find((contact) => contact.id === contactId);
+  return result || null;
 };
 
 export const addContact = async (body) => {
@@ -36,7 +33,7 @@ export const addContact = async (body) => {
     phone,
   };
   contacts.push(newContact);
-  await updateContactsFile(contacts);
+  await writeContactsToFile(contacts);
   return newContact;
 };
 
@@ -45,7 +42,7 @@ export const updateContact = async (contactId, body) => {
   const index = contacts.findIndex((contact) => contact.id === contactId);
   if (index === -1) return null;
   contacts[index] = { ...contacts[index], ...body };
-  await updateContactsFile(contacts);
+  await writeContactsToFile(contacts);
   return contacts[index];
 };
 
@@ -53,7 +50,7 @@ export const removeContact = async (contactId) => {
   const contacts = await listContacts();
   const index = contacts.findIndex((contact) => contact.id === contactId);
   if (index === -1) return null;
-  const [result] = contacts.splice(index, 1);
-  await updateContactsFile(contacts);
-  return result;
+  const [removedContact] = contacts.splice(index, 1);
+  await writeContactsToFile(contacts);
+  return removedContact;
 };
