@@ -24,7 +24,7 @@ const userSchema = new Schema(
   {
     password: {
       type: String,
-      minlength: 6,
+      minLength: 6,
       required: [true, "Password is required"],
     },
     email: {
@@ -39,6 +39,10 @@ const userSchema = new Schema(
       required: [true, "Subscription is required"],
       default: "starter",
     },
+    avatarURL: {
+      type: String,
+      required: true,
+    },
     token: {
       type: String,
       default: null,
@@ -48,6 +52,7 @@ const userSchema = new Schema(
 );
 
 userSchema.post("save", handleMongooseError);
+
 userSchema.pre("findOneAndUpdate", runValidatorsAtUpdate);
 userSchema.post("findOneAndUpdate", handleSaveError);
 
