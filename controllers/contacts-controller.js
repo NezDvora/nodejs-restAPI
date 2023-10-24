@@ -1,6 +1,10 @@
 import { HttpError } from "../helpers/index.js";
 import { ContactDB } from "../models/index.js";
 import { ctrlWrapper } from "../decorators/index.js";
+import fs from "fs/promises";
+import path from "path";
+
+const avatarsDir = path.resolve("public", "avatars");
 
 const getAll = async (req, res) => {
   const { _id: owner } = req.user;
@@ -28,7 +32,11 @@ const getById = async (req, res) => {
 
 const add = async (req, res) => {
   const { _id: owner } = req.user;
-  const result = await ContactDB.create({ ...req.body, owner });
+  const { path: oldPath, filename } = req.file;
+  const newPath = path.join(avatarsDir, filename);
+  await fs.rename(oldPath, newPath);
+  const avatarURL = path.join("avatars", filename);
+  const result = await ContactDB.create({ ...req.body, avatarURL, owner });
   res.status(201).json(result);
 };
 
@@ -48,12 +56,16 @@ const updateById = async (req, res) => {
 };
 
 const updateFavorite = async (req, res, next) => {
-  const {_id: owner} = req.user;
+  const { _id: owner } = req.user;
   const { contactId } = req.params;
-  const result = await ContactDB.findOneAndUpdate({_id:contactId, owner}, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  const result = await ContactDB.findOneAndUpdate(
+    { _id: contactId, owner },
+    req.body,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
   if (!result) {
     throw HttpError(404, "Not Found");
   }
