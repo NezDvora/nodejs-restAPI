@@ -2,7 +2,7 @@ import express from "express";
 import "dotenv/config";
 
 import authCtrl from "../../controllers/auth-controller.js";
-import { authSchema, subscriptionSchema } from "../../models/index.js";
+import { authSchema, emailSchema, subscriptionSchema } from "../../models/index.js";
 import { validateBody } from "../../decorators/index.js";
 import { authenticate, upload } from "../../middlewares/index.js";
 
@@ -16,6 +16,10 @@ router.patch(
 );
 
 router.post("/register", validateBody(authSchema), authCtrl.register);
+
+router.get("/verify/:verificationCode", authCtrl.verifyEmail);
+
+router.post("/verify", validateBody(emailSchema), authCtrl.resendVerifyEmail);
 
 router.post("/login", validateBody(authSchema), authCtrl.login);
 
