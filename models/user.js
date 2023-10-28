@@ -14,6 +14,12 @@ export const authSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
+export const emailSchema = Joi.object({
+  email: Joi.string().pattern(emailRegExp).required().messages({
+    "string.pattern.base": "An error from Joi or another validation library",
+  }),
+});
+
 export const subscriptionSchema = Joi.object({
   subscription: Joi.string()
     .valid(...subscriptionList)
@@ -46,6 +52,13 @@ const userSchema = new Schema(
     token: {
       type: String,
       default: null,
+    },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationCode: {
+      type: String,
     },
   },
   { versionKey: false, timestamps: true }
